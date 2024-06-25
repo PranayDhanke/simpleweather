@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Weather.css";
+import "react-toastify/dist/ReactToastify.css";
 
 import SearchImg from "../images/search.png";
 import HumImage from "../images/humidity.png";
@@ -10,48 +11,61 @@ import ClearImage from "../images/clear.png";
 import DizzImage from "../images/drizzle.png";
 import RainImage from "../images/rain.png";
 import SnowImage from "../images/snow.png";
+import { ToastContainer, toast } from "react-toastify";
 
 const Weather = () => {
   const [TempValue, setTempValue] = useState("New York");
   const [icon, seticon] = useState("");
 
   const [Temp, setTemp] = useState("");
+  const [condition, setcondition] = useState("");
   const [cName, setCName] = useState("");
   const [Hum, setHum] = useState("");
   const [Winds, setWinds] = useState("");
 
   let API_Key = "e214524cb2b3b7a59dc597dff8a68773";
 
-  const selecalled = async () => {
-    let url = `https://api.openweathermap.org/data/2.5/weather?q=${TempValue}&units=Metric&appid=${API_Key}`;
-    try {
-      let responce = await fetch(url);
-      let data = await responce.json();
+  useEffect(() => {
+    const selecalled = async () => {
+      let url = `https://api.openweathermap.org/data/2.5/weather?q=${TempValue}&units=Metric&appid=${API_Key}`;
+      try {
+        let responce = await fetch(url);
+        if (responce.ok) {
+          let data = await responce.json();
 
-      setTemp(data.main.temp);
-      setHum(data.main.humidity);
-      setWinds(data.wind.speed);
-      setCName(data.name);
+          setTemp(data.main.temp);
+          setHum(data.main.humidity);
+          setWinds(data.wind.speed);
+          setCName(data.name);
 
-      let wicon = data.weather[0].main;
+          let wicon = data.weather[0].main;
 
-      if (wicon === "Clear") {
-        seticon(ClearImage);
-      } else if (wicon === "Haze") {
-        seticon(DizzImage);
-      } else if (wicon === "Clouds") {
-        seticon(CloudImage);
-      } else if (wicon === "Rain") {
-        seticon(RainImage);
-      } else if (wicon === "Snow") {
-        seticon(SnowImage);
+          if (wicon === "Clear") {
+            seticon(ClearImage);
+            setcondition("Clear");
+          } else if (wicon === "Haze") {
+            seticon(DizzImage);
+            setcondition("Haze");
+          } else if (wicon === "Clouds") {
+            seticon(CloudImage);
+            setcondition("Clouds");
+          } else if (wicon === "Rain") {
+            seticon(RainImage);
+            setcondition("Rain");
+          } else if (wicon === "Snow") {
+            seticon(SnowImage);
+            setcondition("Snow");
+          }
+        }else{
+          toast.error("City is not listed")
+        }
+      } catch (err) {
+        toast.error(err);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    };
 
-  selecalled();
+    selecalled();
+  });
 
   const search = async () => {
     const element = document.getElementsByClassName("SearchBar");
@@ -83,9 +97,10 @@ const Weather = () => {
       </div>
       <div className="Whether-Report-DI">
         <img className="Image" src={icon} alt="" />
-        <h1>
+        <h4>Weather Condition : {condition} </h4>
+        <h2>
           <span className="TempPercentage">{Temp}</span>°c
-        </h1>
+        </h2>
         <h3 className="TempCity">{cName}</h3>
       </div>
       <div className="HumWinSpeed">
@@ -104,8 +119,8 @@ const Weather = () => {
           </div>
         </div>
       </div>
+      <ToastContainer />
     </div>
-
   );
 };
 
